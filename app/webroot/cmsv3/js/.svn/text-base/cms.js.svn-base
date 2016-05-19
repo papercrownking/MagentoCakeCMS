@@ -1,0 +1,291 @@
+
+$(document).ready(function() {
+
+	//TOGGLE ACTIVE NAVIGATION
+	var cakeController = window.location.pathname.split('/');
+
+	if(cakeController[2] == ''){cakeController[2] = 'dashboard'; }
+	if(cakeController[2] == 'baskets' || cakeController[2] == 'reviews' || cakeController[2] == 'feedbacks'){cakeController[2] = 'members'; }
+	if(cakeController[2] == 'memcached' || cakeController[2] == 'users'){cakeController[2] = 'system'; }
+	if(cakeController[2] == 'categories'){cakeController[2] = 'catalog'; }
+	$("#"+cakeController[2]+"-level0").toggleClass('active level0');
+
+
+ 	var clonedHeaderRow;
+
+   	$(".middle").each(function() {
+       		clonedHeaderRow = $(".content-header-floating", this);
+       		clonedHeaderRow.before(clonedHeaderRow.clone()).css("width", clonedHeaderRow.width());     
+ 	});
+   
+   	$(window).scroll(UpdateTableHeaders).trigger("scroll");
+
+	$('.parent').mouseover(function() {
+		$(this).addClass('over');
+	});
+
+	$('.parent').mouseout(function() {
+		$(this).removeClass('over');
+	});
+
+	//SORT TABLES
+	$('.data').tablesorter({headers: { 0: { sorter: false}}});
+ 
+	//PAGE TAB NAVIGATION
+	$('ul.tabs').each(function(){
+
+   		var $active, $content, $links = $(this).find('a');
+    		$active = $($links.filter('[href="'+location.hash+'"]')[0] || $links[0]);
+    		$active.addClass('active');
+    		$content = $($active.attr('href'));
+    		$links.not($active).each(function () {
+        		$($(this).attr('href')).hide();
+    		});
+
+    		$(this).on('click', 'a', function(e){
+        		$active.removeClass('active');
+        		$content.hide();
+        		$active = $(this);
+        		$content = $($(this).attr('href'));
+        		$active.addClass('active');
+        		$content.show();
+        		e.preventDefault();
+    		});	
+	});
+
+	//CHECKBOX CSS UPDATES
+	$('.allCheck').click(function(){
+ 		$('.checkBoxSelect').attr('checked', this.checked);	
+	});
+
+});  
+
+function UpdateTableHeaders() {
+   $(".middle").each(function() {
+   
+       var el             = $(this),
+           offset         = el.offset(),
+           scrollTop      = $(window).scrollTop(),
+           floatingHeader = $(".content-header-floating", this)
+       
+       if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
+           floatingHeader.css({
+            "display":"block"
+           });
+       } else {
+           floatingHeader.css({
+            "display": "none"
+           });      
+       };
+   });
+}
+
+function changeTab(elementId){
+	$('.tab-item-link active').attr('class','tab-item-link');
+	$('#'+elementId+'_a').toggleClass('tab-item-link active');
+
+}
+
+function updateAccordion(elementId){
+
+href = $('#'+elementId).attr('rel');
+$.ajax({
+	url: href,
+	type: "post",
+	success: function(data) {
+	$('#'+elementId).parent().toggleClass('open');
+	parentId = $('#'+elementId).parent().attr('id');	
+	$('#'+parentId+'-results').toggleClass('open').html(data);
+	
+	}
+});	
+}
+
+function viewActionAccordion(elementId){
+	$('#'+elementId).parent().toggleClass('open');
+	parentId = $('#'+elementId).parent().attr('id');	
+	$('#'+parentId+'-actions').toggleClass('open');
+}
+
+function showTable(formId){
+  href = $('#'+formId).attr('action');
+  $.ajax({
+	 url: href,
+	 type: "post",
+	 data:$('#'+formId).serialize(),
+	 success: function(data) {
+	 $('.ajaxTable').html(data);	
+	 }
+  });	
+}
+
+function printFormTable(formId){
+  href = $('#'+formId).attr('action');
+
+}
+
+function submitForm(formId){
+href = $('#'+formId).attr('action');
+
+$('.validation-advice').remove();
+
+$.ajax({
+	url: href,
+	type:"post",
+	data:$('#'+formId).serialize(),
+	success:  function(data) {
+		$('#messages').html(data);
+	}
+});
+
+}
+
+function flushCache(){
+$.ajax({
+	url: '/cmsv3/memcached/flush',
+	type:"post",
+	data:'',
+	success:  function(data) {
+		$('#messages').html(data);
+	}
+});
+}
+
+function submitDeleteForm(formID){
+	var submitConfirm = confirm("Are you really sure you want to delete the selected data?");
+	if(submitConfirm == true){
+		$('#'+formID).submit();
+	} else {
+		return false;
+	}
+}
+
+function submitDeleteRow(ajaxElement,controller,action,id){
+  href = "/cmsv3/"+controller+"/"+action; 
+  $.ajax({
+	 url: href,
+	 type:"post",
+	 data: {data: {id: id}},
+	 success:  function(data) {
+      $('#'+ajaxElement).html(data);
+		  //$('#messages').html(data);
+	 }
+  });	
+}
+
+function submitMultiForm(formID,action){
+	var submitConfirm = confirm("Are you really sure you want to modify the selected data?");
+	if(submitConfirm == true){
+		$('#'+formID).attr("action",action);
+		$('#'+formID).submit();
+	} else {
+		return false;
+	}
+}
+
+$(function(){
+	
+	var dropbox = $('#dropbox'),
+		message = $('.message', dropbox);
+	
+	dropbox.filedrop({
+		// The name of the $_FILES entry:
+		paramname:'pic',
+		
+		maxfiles: 5,
+    	maxfilesize: 2,
+		url: 'http://foliosociety.dyndns.org/cmsv3/categories/uploadfile',
+		
+		uploadFinished:function(i,file,response){
+			$.data(file).addClass('done');
+			// response is the JSON object that post_file.php returns
+		},
+		
+    	error: function(err, file) {
+			switch(err) {
+				case 'BrowserNotSupported':
+					showMessage('Your browser does not support HTML5 file uploads!');
+					break;
+				case 'TooManyFiles':
+					alert('Too many files! Please select 5 at most! (configurable)');
+					break;
+				case 'FileTooLarge':
+					alert(file.name+' is too large! Please upload files up to 2mb (configurable).');
+					break;
+				default:
+					break;
+			}
+		},
+		
+		// Called before each upload is started
+		beforeEach: function(file){
+			if(!file.type.match(/^image\//)){
+				alert('Only images are allowed!');
+				
+				// Returning false will cause the
+				// file to be rejected
+				return false;
+			}
+		},
+		
+		uploadStarted:function(i, file, len){
+			createImage(file);
+		},
+		
+		progressUpdated: function(i, file, progress) {
+			$.data(file).find('.progress').width(progress);
+		}
+
+    	 
+	});
+	
+	var template = '<div class="preview">'+
+						'<span class="imageHolder">'+
+							'<img />'+
+							'<span class="uploaded"></span>'+
+						'</span>'+
+						'<div class="progressHolder">'+
+							'<div class="progress"></div>'+
+						'</div>'+
+					'</div>'; 
+	
+	
+	function createImage(file){
+
+		var preview = $(template), 
+			image = $('img', preview);
+			
+		var reader = new FileReader();
+		
+		image.width = 100;
+		image.height = 100;
+		
+		reader.onload = function(e){
+			
+			// e.target.result holds the DataURL which
+			// can be used as a source of the image:
+			
+			image.attr('src',e.target.result);
+		};
+		
+		// Reading the file as a DataURL. When finished,
+		// this will trigger the onload function above:
+		reader.readAsDataURL(file);
+		
+		message.hide();
+		preview.appendTo(dropbox);
+		
+		// Associating a preview container
+		// with the file, using jQuery's $.data():
+		
+		$.data(file,preview);
+	}
+
+	function showMessage(msg){
+		message.html(msg);
+	}
+
+});
+
+
+

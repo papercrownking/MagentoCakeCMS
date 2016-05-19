@@ -1,0 +1,5 @@
+<?php
+class MemberStatus extends AppModel {
+	var $name = 'MemberStatus';
+	var $useTable = 'MemberStatus';
+}

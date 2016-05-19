@@ -1,0 +1,75 @@
+
+
+#page-login {
+	background:#F8F8F8;
+	text-align:center;
+}
+
+
+.logincontainer {
+	width: 581px;
+	margin: 170px auto;
+	padding-left: 32px;
+}
+
+.login-form {
+	padding: 13px 57px 13px 57px;
+	background:url('/cmsv3/images/login_box_bg.jpg') no-repeat;
+	text-align:left;
+	border:1px solid #CDCDCD;
+}
+
+.login-form form{
+margin-left:130px;
+}
+.login-form input {
+	margin: 5px 0px 0px 5px;
+	padding:5px;
+}
+
+
+.login-copyright {
+	padding:10px;
+	border-bottom:1px solid #CDCDCD;
+	border-left:1px solid #CDCDCD;
+	border-right:1px solid #CDCDCD;
+}
+
+
+
+.paginator {
+	width:100%;
+	padding:4px;
+	background: #F7F7F7;
+	margin:auto;
+	border:1px solid #CDCDCD;
+}
+
+
+
+#search input[type="text"] {
+    background: url(/cmsv3/images/search-white.png) no-repeat 10px 6px #EEEEEE;
+    border: 0 none;
+    font: bold 12px Arial,Helvetica,Sans-serif;
+    color: #EB5E00;
+    width:150px;
+    padding: 6px 15px 6px 35px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    -webkit-transition: all 0.7s ease 0s;
+    -moz-transition: all 0.7s ease 0s;
+    -o-transition: all 0.7s ease 0s;
+    transition: all 0.7s ease 0s;
+    float:right;
+    }
+
+#search input[type="text"]:focus {
+    background: url(/cmsv3/images/search-dark.png) no-repeat 10px 6px #fcfcfc;
+    color: ##EB5E00;
+    width: 200px;
+
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    }
+
+
